@@ -8,6 +8,8 @@ Du kan velge mellom:
 
 Output lagres lokalt som `.jpg`.
 
+Appen tar hensyn til EXIF-orientering for å unngå feil rotering av mobilbilder.
+
 ## Installering
 
 ```bash

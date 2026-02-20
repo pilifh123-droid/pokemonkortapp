@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 from typing import Iterable
 
-from PIL import Image
+from PIL import Image, ImageOps
 import tkinter as tk
 from tkinter import filedialog, messagebox
 
@@ -35,8 +35,9 @@ def combine_image_pairs(
         back_path = paths[pair_index + 1]
 
         with Image.open(front_path) as front_img, Image.open(back_path) as back_img:
-            front_rgb = front_img.convert("RGB")
-            back_rgb = back_img.convert("RGB")
+            # Respekter EXIF-orientering før sammenslåing, så bildene ikke blir feil rotert.
+            front_rgb = ImageOps.exif_transpose(front_img).convert("RGB")
+            back_rgb = ImageOps.exif_transpose(back_img).convert("RGB")
 
             new_width = front_rgb.width + back_rgb.width
             new_height = max(front_rgb.height, back_rgb.height)
