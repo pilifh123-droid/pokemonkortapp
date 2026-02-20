@@ -12,10 +12,16 @@ from tkinter import filedialog, messagebox
 VALID_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tiff"}
 
 
-def combine_image_pairs(image_paths: Iterable[Path], output_dir: Path, quality: int = 95) -> list[Path]:
+def combine_image_pairs(
+    image_paths: Iterable[Path],
+    output_dir: Path,
+    quality: int = 95,
+    start_from_end: bool = True,
+) -> list[Path]:
     paths = [Path(p) for p in image_paths]
-    # Starter fra siste bilde i listen: N+N-1, deretter nedover.
-    paths = list(reversed(paths))
+    if start_from_end:
+        # Starter fra siste bilde i listen: N+N-1, deretter nedover.
+        paths = list(reversed(paths))
     if len(paths) < 2:
         raise ValueError("Du må velge minst to bilder.")
     if len(paths) % 2 != 0:
@@ -55,6 +61,7 @@ class CardCombinerApp:
 
         self.file_count_var = tk.StringVar(value="Ingen filer valgt")
         self.output_var = tk.StringVar(value=str(Path.cwd() / "output"))
+        self.start_from_end_var = tk.BooleanVar(value=True)
 
         self._build_ui()
 
@@ -71,11 +78,17 @@ class CardCombinerApp:
         tk.Entry(output_row, textvariable=self.output_var).pack(side="left", fill="x", expand=True)
         tk.Button(output_row, text="Velg mappe", command=self._select_output_dir).pack(side="left", padx=(8, 0))
 
+        tk.Checkbutton(
+            frame,
+            text="Start fra slutten av listen (N+N-1, N-2+N-3, ...)",
+            variable=self.start_from_end_var,
+        ).pack(anchor="w", pady=(0, 8))
+
         tk.Button(frame, text="Kombiner og lagre .jpg", command=self._run_combination, bg="#2ecc71").pack(anchor="w")
 
         hint_text = (
             "Tips: Velg bilder i ønsket rekkefølge.\n"
-            "Appen starter fra siste bilde i listen: N+N-1, N-2+N-3, osv."
+            "Huk av for å starte fra slutten, eller fjern haken for å starte fra begynnelsen."
         )
         tk.Label(frame, text=hint_text, fg="#555", pady=12, justify="left").pack(anchor="w")
 
@@ -98,7 +111,11 @@ class CardCombinerApp:
     def _run_combination(self) -> None:
         try:
             output_dir = Path(self.output_var.get()).expanduser().resolve()
-            created = combine_image_pairs(self.selected_files, output_dir=output_dir)
+            created = combine_image_pairs(
+                self.selected_files,
+                output_dir=output_dir,
+                start_from_end=self.start_from_end_var.get(),
+            )
         except ValueError as err:
             messagebox.showerror("Ugyldig input", str(err))
             return
@@ -124,7 +141,7 @@ def collect_images_from_dir(input_dir: Path) -> list[Path]:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Kombiner Pokémon-kortbilder side om side (1+2, 3+4, ...)."
+        description="Kombiner Pokémon-kortbilder side om side."
     )
     parser.add_argument(
         "--input-dir",
@@ -143,6 +160,11 @@ def parse_args() -> argparse.Namespace:
         default=95,
         help="JPEG-kvalitet fra 1-100 (default: 95)",
     )
+    parser.add_argument(
+        "--start-from-start",
+        action="store_true",
+        help="Kombiner fra starten av listen (1+2, 3+4, ...).",
+    )
     return parser.parse_args()
 
 
@@ -151,7 +173,12 @@ def main() -> None:
 
     if args.input_dir:
         images = collect_images_from_dir(args.input_dir)
-        created = combine_image_pairs(images, output_dir=args.output_dir, quality=args.quality)
+        created = combine_image_pairs(
+            images,
+            output_dir=args.output_dir,
+            quality=args.quality,
+            start_from_end=not args.start_from_start,
+        )
         print(f"Lagde {len(created)} kombinerte bilder i {args.output_dir.resolve()}")
         return
 
