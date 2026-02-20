@@ -2,10 +2,9 @@
 
 En enkel app som kombinerer bilder av fremside og bakside av kort side om side:
 
-- bilde 1 + 2
-- bilde 3 + 4
-- bilde 5 + 6
-- osv.
+- siste + nest siste
+- tredje siste + fjerde siste
+- osv. (N+N-1, N-2+N-3, ...)
 
 Output lagres lokalt som `.jpg`.
 
@@ -25,7 +24,7 @@ Start appen:
 python app.py
 ```
 
-1. Klikk **Velg bilder (flere)** og velg filene i korrekt rekkefølge (foran, bak, foran, bak ...).
+1. Klikk **Velg bilder (flere)** (rekkefølgen beholdes, men appen starter fra siste valgte bilde).
 2. Velg lagringsmappe.
 3. Klikk **Kombiner og lagre .jpg**.
 
@@ -37,7 +36,7 @@ Hvis du allerede har alle bildene i én mappe, kan du kjøre uten GUI:
 python app.py --input-dir ./bilder --output-dir ./ferdige --quality 95
 ```
 
-- Filene i input-mappen sorteres alfabetisk.
+- Filene i input-mappen sorteres alfabetisk, men behandling starter fra siste fil i listen.
 - Antall bilder må være et partall.
 
 ## Navn på output-filer

@@ -14,6 +14,8 @@ VALID_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tiff"}
 
 def combine_image_pairs(image_paths: Iterable[Path], output_dir: Path, quality: int = 95) -> list[Path]:
     paths = [Path(p) for p in image_paths]
+    # Starter fra siste bilde i listen: N+N-1, deretter nedover.
+    paths = list(reversed(paths))
     if len(paths) < 2:
         raise ValueError("Du må velge minst to bilder.")
     if len(paths) % 2 != 0:
@@ -72,8 +74,8 @@ class CardCombinerApp:
         tk.Button(frame, text="Kombiner og lagre .jpg", command=self._run_combination, bg="#2ecc71").pack(anchor="w")
 
         hint_text = (
-            "Tips: Velg bilder i riktig rekkefølge (foran, bak, foran, bak, ...).\n"
-            "Appen kombinerer bilde 1+2, 3+4, 5+6 osv."
+            "Tips: Velg bilder i ønsket rekkefølge.\n"
+            "Appen starter fra siste bilde i listen: N+N-1, N-2+N-3, osv."
         )
         tk.Label(frame, text=hint_text, fg="#555", pady=12, justify="left").pack(anchor="w")
 
@@ -127,7 +129,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--input-dir",
         type=Path,
-        help="Mappe med bilder i riktig rekkefølge (filnavn sorteres alfabetisk).",
+        help="Mappe med bilder (filnavn sorteres alfabetisk, men kombineres fra slutten).",
     )
     parser.add_argument(
         "--output-dir",
